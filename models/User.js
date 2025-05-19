@@ -23,13 +23,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    confirmPassword: {
-        type: String,
-        required: true,
-    },
     dateOfBirth: {
-        type: Date,
-        required: true,
+    type: Date,
+    required: function() {
+        return this.role === 'patient';
+    }
     },
     // Patient-specific fields
     bloodType: {

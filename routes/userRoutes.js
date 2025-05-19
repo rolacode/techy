@@ -4,7 +4,7 @@ const multer = require('../middleware/multer');
 
 const router = express.Router();
 
-router.post('/register', multer.single('avatar'), registerUser);
+router.post('/register', multer.single('image'), registerUser);
 router.post('/login', login);
 
 module.exports = router;

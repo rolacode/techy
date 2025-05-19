@@ -80,6 +80,7 @@ const resetPasswordHandler = async (req, res) => {
 
         res.status(200).json({ message: 'Password reset successful' });
     } catch (error) {
+        console.error('Reset password error:', error);
         res.status(400).json({ error: 'Invalid or expired token' });
     }
 };
