@@ -1,0 +1,23 @@
+{
+  "name": "techy",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/rolacode/medlink-backend#readme",
+  "bugs": {
+    "url": "https://github.com/rolacode/medlink-backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rolacode/medlink-backend.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
