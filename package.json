@@ -15,9 +15,30 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node server.js",
+    "test": "jest",
+    "serve": "nodemon server.js"
   },
   "dependencies": {
-    "express": "^5.1.0"
+    "@stripe/stripe-js": "^7.3.0",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^2.2.0",
+    "cloudinary": "^2.6.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "expressjs": "^1.0.1",
+    "fs": "^0.0.1-security",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.15.0",
+    "multer": "^1.4.5-lts.2",
+    "nodemailer": "^7.0.3",
+    "nodemon": "^3.1.10",
+    "peerjs": "^1.5.4",
+    "socket.io": "^4.8.1",
+    "streamifier": "^0.1.1",
+    "uuid": "^11.1.0"
   }
 }

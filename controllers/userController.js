@@ -1,0 +1,154 @@
+const User = require('../models/User');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const uploadToCloudinary = require('../middleware/uploadToCloudinary');
+
+exports.registerUser = async (req, res) => {
+    try {
+        const {
+            role, firstName, lastName, email, password, confirmPassword,
+            dateOfBirth, bloodType, allergies, specialization,
+            licenseNumber, yearsOfExperience, hospital, image
+        } = req.body;
+        const file = req.file;
+
+        // Basic validation
+        if (
+            !role || !firstName || !lastName || !email || !password || !confirmPassword ||
+            !dateOfBirth || (!file && !image) // <- Accept either file or image URL
+        ) {
+            return res.status(400).json({ message: "All fields are required including image" });
+        }
+
+        // Doctor-only fields
+        if (role === 'doctor') {
+            if (!specialization || !licenseNumber || !yearsOfExperience || !hospital) {
+                return res.status(400).json({ message: "All doctor fields are required" });
+            }
+        }
+
+        // Patient-only fields
+        if (role === 'patient') {
+            if (!bloodType || !allergies) {
+                return res.status(400).json({ message: "All patient fields are required" });
+            }
+        }
+
+        if (password !== confirmPassword) {
+            return res.status(400).json({ message: "Passwords do not match" });
+        }
+
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({ message: "Email already in use" });
+        }
+
+        let imageUrl = image || null;
+
+        // If a file was uploaded, override the imageUrl with the Cloudinary URL
+        if (file) {
+            const result = await uploadToCloudinary(file.buffer);
+            imageUrl = result.secure_url;
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = new User({
+            role,
+            firstName,
+            lastName,
+            email,
+            password: hashedPassword,
+            confirmPassword: hashedPassword,
+            dateOfBirth,
+            bloodType,
+            allergies,
+            specialization,
+            licenseNumber,
+            yearsOfExperience,
+            hospital,
+            image: imageUrl,
+        });
+
+        await newUser.save();
+
+        const token = jwt.sign(
+            { id: newUser._id, role: newUser.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        res.status(201).json({
+            message: 'User registered successfully',
+            token,
+            user: {
+                id: newUser._id,
+                role: newUser.role,
+                firstName: newUser.firstName,
+                lastName: newUser.lastName,
+                email: newUser.email,
+                bloodType: newUser.bloodType,
+                allergies: newUser.allergies,
+                specialization: newUser.specialization,
+                image: newUser.image,
+            },
+        });
+    } catch (err) {
+        console.error("Registration Error:", err.message);
+        res.status(500).json({ message: 'Server error during registration' });
+    }
+};
+
+exports.login = async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
+
+        const token = jwt.sign(
+            { id: user._id, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        res.status(200).json({
+            token,
+            user: {
+                id: user._id,
+                role: user.role,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                bloodType: user.bloodType,
+                allergies: user.allergies,
+                specialization: user.specialization,
+                image: user.image,
+            },
+        });
+    } catch (err) {
+        console.error("Login Error:", err.message);
+        res.status(500).json({ message: 'Server error during login' });
+    }
+};
+
+exports.getDoctor = async (req, res) => {
+    try {
+        const doctor = await User.find({ role: 'doctor' }).select('-password');
+        res.status(200).json(doctor);
+    } catch (err) {
+        console.error('Error fetching doctor:', err);
+        res.status(500).json({ message: 'Server error while fetching doctor' });
+    }
+};

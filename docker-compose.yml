@@ -1,0 +1,32 @@
+services:
+  # api:
+  #   build: .
+  #   container_name: medLink-api
+  #   ports:
+  #     - 5000:5000
+  #   command: "npm start"
+
+  medLink-mongodb:
+    container_name: madlink-mongodb
+    image: mongo
+    restart: always
+    command: "mongod --port 27066"
+    ports:
+      - "27066:27066"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: Rotimi0512
+    volumes:
+      - ./data:/data/db
+
+  medLink-mongo-express:
+    container_name: medlink-mongo-express
+    image: mongo-express
+    restart: always
+    ports:
+      - 8086:8086
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: Rotimi0512
+      ME_CONFIG_MONGODB_URL: mongodb://root:Rotimi0512@localhost:27066/
+      ME_CONFIG_BASICAUTH: false
