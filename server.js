@@ -9,6 +9,8 @@ const { Server } = require('socket.io');
 const { setupSocket } = require('./controllers/chatController');
 const resetPasswordRoutes = require('./routes/resetPasswordRoutes');
 const userRoutes = require('./routes/userRoutes');
+const appointmentRoutes = require('./routes/appointmentRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -54,6 +56,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/user', userRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/appointments', appointmentRoutes);
 app.use('/api/resetPassword', resetPasswordRoutes);
 
 app.get('/', (req, res) => res.send('API Running'));

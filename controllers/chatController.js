@@ -1,29 +1,25 @@
-let users = {};
+const Message = require('../models/Message');
 
-exports.setupSocket = (io) => {
-    io.on('connection', (socket) => {
-        console.log('User connected:', socket.id);
+function setupSocket(io) {
+  io.on('connection', (socket) => {
+    console.log('🔌 New client connected:', socket.id);
 
-        socket.on('join', ({ userId }) => {
-            users[userId] = socket.id;
-            console.log(`User ${userId} joined with socket ${socket.id}`);
-        });
-
-        socket.on('send_message', ({ toUserId, message, fromUserId }) => {
-            const receiverSocketId = users[toUserId];
-            if (receiverSocketId) {
-                io.to(receiverSocketId).emit('receive_message', { message, fromUserId });
-            }
-        });
-
-        socket.on('disconnect', () => {
-            for (let userId in users) {
-                if (users[userId] === socket.id) {
-                    delete users[userId];
-                    break;
-                }
-            }
-            console.log('User disconnected:', socket.id);
-        });
+    socket.on('join', ({ userId }) => {
+      socket.join(userId);
+      console.log(`User ${userId} joined their room`);
     });
-};
+
+    socket.on('private_message', async ({ sender, receiver, content, appointmentId }) => {
+      const message = new Message({ sender, receiver, content, appointment: appointmentId });
+      await message.save();
+
+      io.to(receiver).emit('receive_message', message);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Client disconnected:', socket.id);
+    });
+  });
+}
+
+module.exports = { setupSocket };

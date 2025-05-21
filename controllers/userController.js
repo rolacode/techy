@@ -161,7 +161,7 @@ exports.login = async (req, res) => {
 exports.getDoctor = async (req, res) => {
   try {
     const doctors = await User.find({ role: 'doctor' }).select('-password');
-    res.status(200).json(doctors);
+    res.status(200).json({ doctors }); // wrap in an object
   } catch (err) {
     console.error('Error fetching doctors:', err);
     res.status(500).json({ message: 'Server error while fetching doctors' });
