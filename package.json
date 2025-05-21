@@ -13,11 +13,11 @@
   "license": "ISC",
   "author": "",
   "type": "commonjs",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
-    "dev": "nodemon server.js",
+    "dev": "nodemon index.js",
     "test": "jest",
-    "serve": "node server.js"
+    "serve": "node index.js"
   },
   "dependencies": {
     "@stripe/stripe-js": "^7.3.0",
@@ -28,7 +28,6 @@
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "expressjs": "^1.0.1",
     "fs": "^0.0.1-security",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
