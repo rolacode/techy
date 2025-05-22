@@ -1,7 +1,7 @@
 {
   "name": "techy",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "index.js",
   "description": "",
   "license": "ISC",
   "author": "",
@@ -9,7 +9,7 @@
     "dev": "vite",           
     "build": "vite build",
     "test": "jest",
-    "serve": "node server.js"
+    "serve": "node index.js"
   },
   "engines": {
     "node": ">=18.0.0"
