@@ -16,6 +16,7 @@
   "type": "commonjs",
   "scripts": {
     "dev": "nodemon server.js",
+    "build": "npm install; npm run build",
     "test": "jest",
     "serve": "node server.js"
   },
