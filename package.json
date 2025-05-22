@@ -1,22 +1,12 @@
 {
   "name": "techy",
   "version": "1.0.0",
+  "main": "server.js",
   "description": "",
-  "homepage": "https://github.com/rolacode/medlink-backend#readme",
-  "bugs": {
-    "url": "https://github.com/rolacode/medlink-backend/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/rolacode/medlink-backend.git"
-  },
   "license": "ISC",
   "author": "",
-  "main": "server.js",
-  "type": "commonjs",
   "scripts": {
     "dev": "nodemon server.js",
-    "build": "npm install; npm run build",
     "test": "jest",
     "serve": "node server.js"
   },
