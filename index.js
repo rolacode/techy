@@ -63,12 +63,13 @@ app.use('/api/resetPassword', resetPasswordRoutes);
 app.get('/', (req, res) => res.send('API Running'));
 
 mongoose
+
     .connect(process.env.MONGO_URI)
     .then(() => console.log('MongoDB Connected'))
     .catch((err) => console.error('MongoDB connection error:', err));
 
 const PORT = process.env.PORT || 5000;
-const HOST = '0.0.0.0'; // 👈 This is important for Render/Docker
+const HOST = 'localhost'; 
 
 app.listen(PORT, HOST, () => {
   console.log(`Server is running on http://${HOST}:${PORT}`);
