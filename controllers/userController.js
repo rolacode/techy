@@ -3,6 +3,19 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const uploadToCloudinary = require('../middleware/uploadToCloudinary');
 
+const uploadWithRetry = async (buffer, retries = 2) => {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      if (i > 0) console.log(`Retrying upload attempt ${i}...`);
+      return await uploadToCloudinary(buffer);
+    } catch (err) {
+      if (i === retries) throw err;
+    }
+  }
+};
+
+
+
 exports.registerUser = async (req, res) => {
   try {
     const {
@@ -19,22 +32,19 @@ exports.registerUser = async (req, res) => {
       licenseNumber,
       yearsOfExperience,
       hospital,
-      image, // optional image url string fallback
+      image: imageFromBody,
     } = req.body;
 
-    const file = req.file; // multer file
+    const file = req.file;
 
-    // Basic required fields for all users
     if (!role || !firstName || !lastName || !email || !password || !confirmPassword) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Password match check
     if (password !== confirmPassword) {
       return res.status(400).json({ message: "Passwords do not match" });
     }
 
-    // Validate role-specific required fields
     if (role === 'doctor') {
       if (!specialization || !licenseNumber || !yearsOfExperience || !hospital) {
         return res.status(400).json({ message: "All doctor fields are required" });
@@ -47,23 +57,19 @@ exports.registerUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid user role" });
     }
 
-    // Check email uniqueness
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: "Email already in use" });
     }
 
-    // Handle image upload - either from multer file or image string URL
-    let imageUrl = image || null;
+    let imageUrl = imageFromBody || null;
     if (file && file.buffer) {
-      const result = await uploadToCloudinary(file.buffer);
+      const result = await uploadWithRetry(file.buffer);
       imageUrl = result.secure_url;
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user object (do NOT store confirmPassword)
     const newUser = new User({
       role,
       firstName,
@@ -82,14 +88,12 @@ exports.registerUser = async (req, res) => {
 
     await newUser.save();
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: newUser._id, role: newUser.role },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
-    // Send success response
     res.status(201).json({
       message: 'User registered successfully',
       token,
@@ -108,10 +112,13 @@ exports.registerUser = async (req, res) => {
         image: newUser.image,
       },
     });
-  } catch (err) {
-    console.error("Registration Error:", err.message);
-    res.status(500).json({ message: 'Server error during registration' });
-  }
+} catch (err) {
+  console.error("Registration Error:", err);
+  res.status(500).json({
+    message: err.message || 'Server error during registration',
+  });
+}
+
 };
 
 exports.login = async (req, res) => {
@@ -153,7 +160,7 @@ exports.login = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("Login Error:", err.message);
+    console.error("Login Error:", err);
     res.status(500).json({ message: 'Server error during login' });
   }
 };
@@ -161,7 +168,7 @@ exports.login = async (req, res) => {
 exports.getDoctor = async (req, res) => {
   try {
     const doctors = await User.find({ role: 'doctor' }).select('-password');
-    res.status(200).json({ doctors }); // wrap in an object
+    res.status(200).json({ doctors });
   } catch (err) {
     console.error('Error fetching doctors:', err);
     res.status(500).json({ message: 'Server error while fetching doctors' });

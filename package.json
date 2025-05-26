@@ -6,8 +6,6 @@
   "license": "ISC",
   "author": "",
   "scripts": {
-    "dev": "vite",           
-    "build": "vite build",
     "test": "jest",
     "dev1": "nodemon index.js",
     "serve": "node index.js"

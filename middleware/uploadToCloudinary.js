@@ -1,23 +1,29 @@
-const cloudinary = require('../config/cloudinary');
-const { v4: uuidv4 } = require('uuid');
+const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
 
-const uploadToCloudinary = (buffer) => {
-    return new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-            {
-                folder: 'users',
-                public_id: uuidv4(),
-                resource_type: 'image',
-            },
-            (error, result) => {
-                if (error) return reject(error);
-                resolve(result);
-            }
-        );
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-        streamifier.createReadStream(buffer).pipe(uploadStream);
-    });
+const uploadToCloudinary = (buffer, timeout = 20000) => {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error('Cloudinary upload timeout'));
+    }, timeout);
+
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'users' },
+      (error, result) => {
+        clearTimeout(timer);
+        if (result) resolve(result);
+        else reject(error);
+      }
+    );
+
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
 };
 
 module.exports = uploadToCloudinary;

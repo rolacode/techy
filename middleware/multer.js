@@ -1,17 +1,20 @@
-// middleware/multer.js
 const multer = require("multer");
 const path = require("path");
 
-// Use memory storage for Cloudinary uploads
+// Memory storage for Cloudinary
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (![".jpg", ".jpeg", ".png"].includes(ext)) {
-        cb(new Error("Only .jpg, .jpeg, .png formats are supported"), false);
-    } else {
-        cb(null, true);
-    }
+  const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only .jpg, .jpeg, .png formats are supported"), false);
+  }
 };
 
-module.exports = multer({ storage, fileFilter });
+module.exports = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+});
