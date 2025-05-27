@@ -6,9 +6,10 @@
   "license": "ISC",
   "author": "",
   "scripts": {
+
     "test": "jest",
     "dev1": "nodemon index.js",
-    "serve": "node index.js"
+    "start": "node index.js"
   },
   "engines": {
     "node": ">=18.0.0"
