@@ -13,7 +13,7 @@ config = {
         dialect: 'mongoose',
     },
     jwtSecret: process.env.JWT_SECRET,
-    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    // STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
 }
 
 module.exports = config;
