@@ -14,7 +14,7 @@ services:
     ports:
       - "27066:27066"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_USERNAME: Rolament
       MONGO_INITDB_ROOT_PASSWORD: Rotimi0512
     volumes:
       - ./data:/data/db
@@ -26,7 +26,7 @@ services:
     ports:
       - 8086:8086
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINUSERNAME: Rolament
       ME_CONFIG_MONGODB_ADMINPASSWORD: Rotimi0512
-      ME_CONFIG_MONGODB_URL: mongodb://root:Rotimi0512@localhost:27066/
+      ME_CONFIG_MONGODB_URL: mongodb+srv://Rolament:Rotimi0512@rolament.p4lirgc.mongodb.net/?retryWrites=true&w=majority&appName=rolament
       ME_CONFIG_BASICAUTH: false

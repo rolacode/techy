@@ -69,9 +69,14 @@ app.use('/api/resetPassword', resetPasswordRoutes);
 app.get('/', (req, res) => res.send('API Running'));
 
 // 🔗 MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB Connected'))
-  .catch((err) => console.error('❌ MongoDB connection error:', err));
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
+
 
 // 🚀 Start HTTP server (important: use server.listen)
 const PORT = process.env.PORT || 5000;
