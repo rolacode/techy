@@ -2,10 +2,11 @@ FROM node:23.1-slim
 
 WORKDIR /app
 
-COPY package.json .
+COPY package.json ./
+COPY . .
 
 RUN npm install
 
 EXPOSE 5000
 
-CMD ["npm", "run", "start"]
+CMD ["node", "index.js"]

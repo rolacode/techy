@@ -6,7 +6,6 @@
   "license": "ISC",
   "author": "",
   "scripts": {
-
     "test": "jest",
     "dev1": "nodemon index.js",
     "start": "node index.js"
@@ -26,7 +25,7 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.0",
-    "multer": "^1.4.5-lts.2",
+    "multer": "^2.0.0",
     "nodemailer": "^7.0.3",
     "peerjs": "^1.5.4",
     "socket.io": "^4.8.1",
