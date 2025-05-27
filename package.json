@@ -24,7 +24,7 @@
     "fs": "^0.0.1-security",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.15.0",
+    "mongoose": "^8.15.1",
     "multer": "^2.0.0",
     "nodemailer": "^7.0.3",
     "peerjs": "^1.5.4",
