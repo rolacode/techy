@@ -16,23 +16,23 @@ const chatRoutes = require('./routes/chatRoutes');
 const app = express();
 const server = http.createServer(app);
 
-// 🧠 Setup Socket.IO on correct server
+//  Setup Socket.IO on correct server
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:5173, https://medlink-health.netlify.app',
+    origin: ['http://localhost:5173', 'https://medlink-health.netlify.app'],
     methods: ['GET', 'POST'],
     credentials: true,
   },
 });
 setupSocket(io);
 
-// 🗂️ Ensure uploads directory exists
+//  Ensure uploads directory exists
 const uploadDir = './uploads';
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
 
-// 🛡️ Helmet CSP
+//  Helmet CSP
 app.use(
   helmet.contentSecurityPolicy({
     useDefaults: true,
@@ -41,19 +41,23 @@ app.use(
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'", 'https:'],
       imgSrc: ["'self'", 'data:', 'https:'],
-      connectSrc: ["'self'", 'http://localhost:5173, https://medlink-health.netlify.app'], // fixed: allow local dev
+      connectSrc: [
+        "'self'",
+        'localhost:5173',
+        'https://medlink-health.netlify.app'
+      ],
       fontSrc: ["'self'", 'https:', 'data:'],
       objectSrc: ["'none'"],
     },
   })
 );
 
-// ⚙️ Webhook must come before body parsers
+//  Webhook must come before body parsers
 app.use('/api/orders/webhook', express.raw({ type: 'application/json' }));
 
-// 🧷 Middleware
+//  Middleware
 app.use(cors({
-  origin: 'http://localhost:5173, https://medlink-health.netlify.app',
+  origin: ['http://localhost:5173', 'https://medlink-health.netlify.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -62,7 +66,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 📦 Routes
+//  Routes
 app.use('/api/user', userRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/appointments', appointmentRoutes);
@@ -79,7 +83,6 @@ mongoose
   })
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
-
 
 // 🚀 Start HTTP server (important: use server.listen)
 const PORT = process.env.PORT || 5000;
