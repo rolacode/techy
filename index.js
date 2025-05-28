@@ -1,4 +1,5 @@
 require('dotenv').config();
+
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -69,6 +70,8 @@ app.use('/api/resetPassword', resetPasswordRoutes);
 app.get('/', (req, res) => res.send('API Running'));
 
 // 🔗 MongoDB
+console.log("✅ Loaded MongoDB URI:", process.env.MONGODB_URI);
+
 mongoose
   .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
