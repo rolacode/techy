@@ -16,29 +16,27 @@ const chatRoutes = require('./routes/chatRoutes');
 const app = express();
 const server = http.createServer(app);
 
-//  Setup Socket.IO on correct server
+// 🧠 Parse allowed origins from .env
+const allowedOrigins = process.env.FRONTEND_URL.split(',').map(url => url.trim());
+
+// 🧠 Setup Socket.IO on correct server
 const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:5173', 'https://medlink-health.netlify.app'],
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
     credentials: true,
   },
 });
 
-const allowedOrigin = [
-  process.env.FRONTEND_URL_DEV,
-  process.env.FRONTEND_URL_PROD,
-];
-
 setupSocket(io);
 
-//  Ensure uploads directory exists
+// 🗂️ Ensure uploads directory exists
 const uploadDir = './uploads';
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
 
-//  Helmet CSP
+// 🛡️ Helmet CSP
 app.use(
   helmet.contentSecurityPolicy({
     useDefaults: true,
@@ -47,27 +45,23 @@ app.use(
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'", 'https:'],
       imgSrc: ["'self'", 'data:', 'https:'],
-      connectSrc: [
-        "'self'",
-        'localhost:5173',
-        'https://medlink-health.netlify.app'
-      ],
+      connectSrc: ["'self'", ...allowedOrigins],
       fontSrc: ["'self'", 'https:', 'data:'],
       objectSrc: ["'none'"],
     },
   })
 );
 
-//  Webhook must come before body parsers
+// ⚙️ Webhook must come before body parsers
 app.use('/api/orders/webhook', express.raw({ type: 'application/json' }));
 
-//  Middleware
+// 🧷 Middleware
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS"));
+      callback(new Error('Not allowed by CORS'));
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -75,11 +69,10 @@ app.use(cors({
   credentials: true,
 }));
 
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//  Routes
+// 📦 Routes
 app.use('/api/user', userRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/appointments', appointmentRoutes);
