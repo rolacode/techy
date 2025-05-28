@@ -24,6 +24,12 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+
+const allowedOrigin = [
+  process.env.FRONTEND_URL_DEV,
+  process.env.FRONTEND_URL_PROD,
+];
+
 setupSocket(io);
 
 //  Ensure uploads directory exists
@@ -57,11 +63,18 @@ app.use('/api/orders/webhook', express.raw({ type: 'application/json' }));
 
 //  Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://medlink-health.netlify.app'],
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 }));
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
