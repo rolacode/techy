@@ -79,6 +79,15 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/resetPassword', resetPasswordRoutes);
 app.get('/', (req, res) => res.send('API Running'));
 
+app.get('/debug/env', (req, res) => {
+  res.json({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET ? '✅ Loaded' : '❌ Missing',
+  });
+});
+
+
 // 🔗 MongoDB
 console.log("✅ Loaded MongoDB URI:", process.env.MONGODB_URI);
 
