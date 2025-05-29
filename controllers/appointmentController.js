@@ -41,15 +41,14 @@ exports.bookAppointment = async (req, res) => {
       status: 'pending'
     });
 
-    // Populate doctor/patient info
-    const populated = await appointment
+    // Proper population using findById
+    const populated = await Appointment.findById(appointment._id)
       .populate('doctor', 'firstName lastName email specialization')
-      .populate('patient', 'firstName lastName email')
-      .execPopulate?.(); // Fallback for older Mongoose versions
+      .populate('patient', 'firstName lastName email');
 
     res.status(201).json({
       message: 'Appointment booked successfully.',
-      appointment: populated || appointment,
+      appointment: populated,
     });
 
   } catch (err) {
@@ -57,6 +56,7 @@ exports.bookAppointment = async (req, res) => {
     res.status(500).json({ error: 'Server error while booking appointment. Please try again later.' });
   }
 };
+
 
 
 exports.getDoctorAppointments = async (req, res) => {
