@@ -6,23 +6,58 @@ exports.bookAppointment = async (req, res) => {
   const patientId = req.user.id;
 
   try {
+    // Validate doctor
     const doctor = await User.findById(doctorId);
     if (!doctor || doctor.role !== 'doctor') {
-      return res.status(400).json({ error: 'Invalid doctor selected' });
+      return res.status(400).json({ error: 'Selected doctor is invalid or not found.' });
     }
 
+    // Validate preferred date is not in the past
+    const today = new Date();
+    const selectedDate = new Date(preferredDate);
+    if (selectedDate < today.setHours(0, 0, 0, 0)) {
+      return res.status(400).json({ error: 'Preferred date must be today or in the future.' });
+    }
+
+    // Check for duplicate appointment
+    const existing = await Appointment.findOne({
+      patient: patientId,
+      doctor: doctorId,
+      preferredDate: selectedDate
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        error: 'You already have an appointment with this doctor on that date.'
+      });
+    }
+
+    // Create appointment
     const appointment = await Appointment.create({
       patient: patientId,
       doctor: doctorId,
       symptoms,
-      preferredDate,
+      preferredDate: selectedDate,
+      status: 'pending'
     });
 
-    res.status(201).json({ message: 'Appointment booked', appointment });
+    // Populate doctor/patient info
+    const populated = await appointment
+      .populate('doctor', 'firstName lastName email specialization')
+      .populate('patient', 'firstName lastName email')
+      .execPopulate?.(); // Fallback for older Mongoose versions
+
+    res.status(201).json({
+      message: 'Appointment booked successfully.',
+      appointment: populated || appointment,
+    });
+
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    console.error('Appointment booking error:', err);
+    res.status(500).json({ error: 'Server error while booking appointment. Please try again later.' });
   }
 };
+
 
 exports.getDoctorAppointments = async (req, res) => {
   const doctorId = req.user.id;

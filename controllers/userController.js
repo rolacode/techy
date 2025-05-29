@@ -14,8 +14,6 @@ const uploadWithRetry = async (buffer, retries = 2) => {
   }
 };
 
-
-
 exports.registerUser = async (req, res) => {
   try {
     const {
@@ -41,6 +39,8 @@ exports.registerUser = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    const emailNormalized = email.toLowerCase();
+
     if (password !== confirmPassword) {
       return res.status(400).json({ message: "Passwords do not match" });
     }
@@ -50,8 +50,13 @@ exports.registerUser = async (req, res) => {
         return res.status(400).json({ message: "All doctor fields are required" });
       }
     } else if (role === 'patient') {
+      // Allow allergies to be empty string or null, treat undefined as missing
       if (!dateOfBirth || !bloodType || allergies === undefined) {
         return res.status(400).json({ message: "All patient fields are required" });
+      }
+      // Optionally: validate dateOfBirth is a valid date string
+      if (isNaN(Date.parse(dateOfBirth))) {
+        return res.status(400).json({ message: "Invalid dateOfBirth format" });
       }
     } else {
       return res.status(400).json({ message: "Invalid user role" });
@@ -68,20 +73,23 @@ exports.registerUser = async (req, res) => {
       imageUrl = result.secure_url;
     }
 
+    // Parse yearsOfExperience as number (doctor only)
+    const yearsOfExperienceNum = role === 'doctor' ? parseInt(yearsOfExperience, 10) : undefined;
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
       role,
       firstName,
       lastName,
-      email,
+      email: emailNormalized,
       password: hashedPassword,
       dateOfBirth: role === 'patient' ? dateOfBirth : undefined,
       bloodType: role === 'patient' ? bloodType : undefined,
       allergies: role === 'patient' ? allergies : undefined,
       specialization: role === 'doctor' ? specialization : undefined,
       licenseNumber: role === 'doctor' ? licenseNumber : undefined,
-      yearsOfExperience: role === 'doctor' ? yearsOfExperience : undefined,
+      yearsOfExperience: yearsOfExperienceNum,
       hospital: role === 'doctor' ? hospital : undefined,
       image: imageUrl,
     });
@@ -112,14 +120,14 @@ exports.registerUser = async (req, res) => {
         image: newUser.image,
       },
     });
-} catch (err) {
-  console.error("Registration Error:", err);
-  res.status(500).json({
-    message: err.message || 'Server error during registration',
-  });
-}
-
+  } catch (err) {
+    console.error("Registration Error:", err);
+    res.status(500).json({
+      message: err.message || 'Server error during registration',
+    });
+  }
 };
+
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
@@ -172,5 +180,58 @@ exports.getDoctor = async (req, res) => {
   } catch (err) {
     console.error('Error fetching doctors:', err);
     res.status(500).json({ message: 'Server error while fetching doctors' });
+  }
+};
+
+exports.getPatientProfile = async (req, res) => {
+  try {
+    const patient = await User.findById(req.user.id).select('-password'); // exclude password
+
+    if (!patient || patient.role !== 'patient') {
+      return res.status(404).json({ error: 'Patient profile not found' });
+    }
+
+    res.status(200).json(patient);
+  } catch (err) {
+    console.error('Error fetching patient profile:', err);
+    res.status(500).json({ error: 'Server error while fetching profile' });
+  }
+};
+
+// PATCH /api/patients/:id/vitals
+exports.updatePatientVitals = async (req, res) => {
+  const doctorId = req.user.id; // from JWT
+  const patientId = req.params.id;
+  const { bloodPressure, heartRate, temperature, oxygenSaturation } = req.body;
+
+  try {
+    // Ensure doctor is logged in
+    const doctor = await User.findById(doctorId);
+    if (!doctor || doctor.role !== 'doctor') {
+      return res.status(403).json({ message: 'Only doctors can update vitals' });
+    }
+
+    const patient = await User.findById(patientId);
+    if (!patient || patient.role !== 'patient') {
+      return res.status(404).json({ message: 'Patient not found' });
+    }
+
+    patient.vitals = {
+      bloodPressure,
+      heartRate,
+      temperature,
+      oxygenSaturation,
+    };
+
+    await patient.save();
+
+    res.status(200).json({
+      message: 'Vitals updated successfully',
+      vitals: patient.vitals,
+    });
+
+  } catch (err) {
+    console.error('Error updating vitals:', err);
+    res.status(500).json({ message: 'Server error while updating vitals' });
   }
 };
