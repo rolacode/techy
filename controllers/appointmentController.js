@@ -88,17 +88,27 @@ exports.respondToAppointment = async (req, res) => {
 
 // @route GET /api/appointments/history
 // @access Private (patients)
-exports.getPatientAppointmentHistory = async (req, res) => {
+exports.getPatientAppointments = async (req, res) => {
   const patientId = req.user.id;
 
   try {
-    const history = await Appointment.find({ patient: patientId })
-      .sort({ preferredDate: -1 }) // most recent first
-      .populate('doctor', 'firstName lastName email specialization');
+    const appointments = await Appointment.find({ patient: patientId })
+      .populate('doctor', 'firstName lastName specialization')
+      .sort({ preferredDate: -1 });
 
-    res.status(200).json({ history });
+    const formatted = appointments.map(appt => ({
+      _id: appt._id,
+      date: appt.preferredDate,
+      status: appt.status,
+      symptoms: appt.symptoms,
+      doctorName: `Dr. ${appt.doctor.firstName} ${appt.doctor.lastName}`,
+      specialization: appt.doctor.specialization
+    }));
+
+    res.status(200).json(formatted);
   } catch (err) {
-    console.error('Error fetching appointment history:', err);
-    res.status(500).json({ error: 'Server error while fetching appointment history.' });
+    console.error('Error loading patient appointments:', err);
+    res.status(500).json({ error: 'Failed to load appointment history' });
   }
 };
+
