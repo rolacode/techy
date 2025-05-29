@@ -85,3 +85,20 @@ exports.respondToAppointment = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+// @route GET /api/appointments/history
+// @access Private (patients)
+exports.getPatientAppointmentHistory = async (req, res) => {
+  const patientId = req.user.id;
+
+  try {
+    const history = await Appointment.find({ patient: patientId })
+      .sort({ preferredDate: -1 }) // most recent first
+      .populate('doctor', 'firstName lastName email specialization');
+
+    res.status(200).json({ history });
+  } catch (err) {
+    console.error('Error fetching appointment history:', err);
+    res.status(500).json({ error: 'Server error while fetching appointment history.' });
+  }
+};
