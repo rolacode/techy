@@ -78,7 +78,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/resetPassword', resetPasswordRoutes);
-app.use('/api/search-doctors', searchDoctorRoutes);
+app.use('/api/doctors', searchDoctorRoutes);
 app.get('/', (req, res) => res.send('API Running'));
 
 app.get('/debug/env', (req, res) => {
