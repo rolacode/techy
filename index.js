@@ -12,6 +12,7 @@ const resetPasswordRoutes = require('./routes/resetPasswordRoutes');
 const userRoutes = require('./routes/userRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const searchDoctorRoutes = require('./routes/searchDoctorRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -77,6 +78,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/resetPassword', resetPasswordRoutes);
+app.use('/api/search-doctors', searchDoctorRoutes);
 app.get('/', (req, res) => res.send('API Running'));
 
 app.get('/debug/env', (req, res) => {
