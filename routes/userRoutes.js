@@ -10,7 +10,11 @@ console.log('protect:', protect);
 router.post('/register', multer.single('image'), registerUser);
 router.post('/login', login);
 router.get('/doctors', getDoctor);
-router.get('/patient/profile', protect, getPatientProfile);
+router.get('/patient/profile', protect, (req, res, next) => {
+  console.log("✅ /patient/profile route hit");
+  next();
+}, getPatientProfile);
+
 router.patch('/patients/:id/vitals', protect, updatePatientVitals);
 
 module.exports = router;
