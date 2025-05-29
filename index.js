@@ -24,10 +24,11 @@ const allowedOrigins = process.env.FRONTEND_URL.split(',').map(url => url.trim()
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // ✅ include PATCH
     credentials: true,
   },
 });
+
 
 setupSocket(io);
 
