@@ -183,6 +183,21 @@ exports.getDoctor = async (req, res) => {
   }
 };
 
+exports.getDoctorProfile = async (req, res) => {
+  try {
+    const doctor = await User.findById(req.user.id).select('-password'); // exclude password
+
+    if (!doctor || doctor.role !== 'doctor') {
+      return res.status(404).json({ error: 'Doctor profile not found' });
+    }
+
+    res.status(200).json(doctor);
+  } catch (err) {
+    console.error('Error fetching doctor profile:', err);
+    res.status(500).json({ error: 'Server error while fetching profile' });
+  }
+};
+
 exports.getPatientProfile = async (req, res) => {
   try {
     const patient = await User.findById(req.user.id).select('-password'); // exclude password
