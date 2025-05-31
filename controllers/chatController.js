@@ -6,13 +6,15 @@ function setupSocket(io) {
 
     socket.on('join', ({ userId }) => {
       socket.join(userId);
-      console.log(`User ${userId} joined their room`);
+      console.log(`User ${userId} joined room ${userId}`);
     });
 
     socket.on('private_message', async ({ sender, receiver, content, appointmentId }) => {
       const message = new Message({ sender, receiver, content, appointment: appointmentId });
       await message.save();
 
+      // Emit message to both sender and receiver
+      io.to(sender).emit('receive_message', message);
       io.to(receiver).emit('receive_message', message);
     });
 
